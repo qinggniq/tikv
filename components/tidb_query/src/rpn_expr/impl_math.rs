@@ -38,6 +38,13 @@ pub fn log10(arg: &Option<Real>) -> Result<Option<Real>> {
     Ok(arg.and_then(|n| f64_to_real(n.log10())))
 }
 
+#[inline]
+#[rpn_fn]
+pub fn sin(args : &Option<Real>)-> Result<Option<Real>> {
+    Ok(arg.and_then(|n| f64_to_real(n.sin())))
+}
+
+
 // If the given f64 is finite, returns `Some(Real)`. Otherwise returns None.
 fn f64_to_real(n: f64) -> Option<Real> {
     if n.is_finite() {
@@ -330,8 +337,25 @@ mod tests {
     #[test]
     fn test_log10() {
         let test_cases = vec![
-            (Some(100_f64), Some(Real::from(2_f64))),
-            (Some(101_f64), Some(Real::from(2.0043213737826426_f64))),
+            (Some(Real::from(PI)), Some(Real::from(0_f64))),
+            (Some(Real::from(PI)/2), Some(Real::from(1_f64))),
+            (Some(Real::from(PI)/6), Some(Real::from(0.5_f64)))
+            (None, None),
+        ];
+        for (input, expect) in test_cases {
+            let output = RpnFnScalarEvaluator::new()
+                .push_param(input)
+                .evaluate(ScalarFuncSig::Sin)
+                .unwrap();
+            assert_eq!(output, expect, "{:?}", input);
+        }
+    }
+
+    #[test]
+    fn test_sin() {
+        let test_cases = vec![
+            (Some(1.5707963267948966_f64), Some(Real::from(2_f64))),
+            (Some(0_f64), Some(Real::from(0))),
             (Some(-1.234_f64), None),
             (Some(0_f64), None),
             (None, None),
@@ -344,7 +368,6 @@ mod tests {
             assert_eq!(output, expect, "{:?}", input);
         }
     }
-
     #[test]
     fn test_abs_int() {
         let test_cases = vec![
